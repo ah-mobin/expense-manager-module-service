@@ -1,5 +1,6 @@
 package com.example.expensemanagermodservice.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,11 +16,9 @@ public class CategoryEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
-    private UUID uuid;
     @Column(nullable = false, length = 64)
     private String name;
-
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
     private List<SubCategoryEntity> subCategories;
 }

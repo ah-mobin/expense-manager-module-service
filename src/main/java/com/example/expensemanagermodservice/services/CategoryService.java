@@ -17,7 +17,6 @@ public class CategoryService {
 
     public CategoryDto createCategory(CategoryDto categoryDto){
         CategoryEntity categoryEntity = new CategoryEntity();
-        categoryDto.setUuid(UUID.randomUUID());
         BeanUtils.copyProperties(categoryDto, categoryEntity);
         CategoryEntity categorySaved = categoryRepository.save(categoryEntity);
         CategoryDto returnedCategory = new CategoryDto();
