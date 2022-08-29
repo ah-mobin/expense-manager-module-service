@@ -8,6 +8,5 @@ import java.util.UUID;
 @Getter
 @Setter
 public class SubCategoryRequestModel {
-    private String category_slug;
     private String name;
 }
