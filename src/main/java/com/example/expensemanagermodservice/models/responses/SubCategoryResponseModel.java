@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class SubCategoryResponseModel {
-    private Long id;
+    private String slug;
     private CategoryEntity category;
     private String name;
 }

@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CategoryResponseModel {
-    private Long id;
+    private String slug;
     private String name;
 }

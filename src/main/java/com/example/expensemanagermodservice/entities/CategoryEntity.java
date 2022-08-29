@@ -18,6 +18,8 @@ public class CategoryEntity {
     private Long id;
     @Column(nullable = false, length = 64)
     private String name;
+    @Column(nullable = false, unique = true, length = 64)
+    private String slug;
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<SubCategoryEntity> subCategories;

@@ -9,6 +9,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 @Service
 public class SubCategoryService {
 
@@ -17,17 +21,26 @@ public class SubCategoryService {
     @Autowired
     CategoryRepository categoryRepository;
 
+    private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
+
     public SubCategoryDto createSubCategory(SubCategoryDto subCategoryDto){
         SubCategoryEntity subCategoryEntity = new SubCategoryEntity();
-        System.out.println("category id"+subCategoryDto.getCategory_id());
-        CategoryEntity category = categoryRepository.findById(subCategoryDto.getCategory_id()).get();
-        System.out.println(category);
+        subCategoryDto.setSlug(toSlug(subCategoryDto.getName()));
+        CategoryEntity category = categoryRepository.findBySlug(subCategoryDto.getCategory_slug()).get();
         subCategoryDto.setCategory(category);
         BeanUtils.copyProperties(subCategoryDto, subCategoryEntity);
         SubCategoryEntity created = subCategoryRepository.save(subCategoryEntity);
         SubCategoryDto returned = new SubCategoryDto();
         BeanUtils.copyProperties(created, returned);
         return returned;
+    }
+
+    private static String toSlug(String name) {
+        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-");
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
+        String slug = NONLATIN.matcher(normalized).replaceAll("");
+        return slug.toLowerCase(Locale.ENGLISH);
     }
 
 

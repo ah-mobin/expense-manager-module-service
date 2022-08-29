@@ -10,7 +10,8 @@ import java.util.UUID;
 @Setter
 public class SubCategoryDto {
     private Long id;
-    private Long category_id;
+    private String category_slug;
     private CategoryEntity category;
     private String name;
+    private String slug;
 }
