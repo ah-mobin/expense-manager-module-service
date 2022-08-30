@@ -1,6 +1,7 @@
 package com.example.expensemanagermodservice.resources;
 
 
+import com.example.expensemanagermodservice.constants.APIEndpoints;
 import com.example.expensemanagermodservice.dtos.CategoryDto;
 import com.example.expensemanagermodservice.entities.CategoryEntity;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
@@ -19,13 +20,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("categories")
 public class CategoryResource {
 
     @Autowired
     CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping(APIEndpoints.CATEGORIES_API)
     public ResponseEntity<List<CategoryResponseModel>> index() {
         return ResponseEntity.ok(categoryService.index().stream().map(this::categoryResponse).collect(Collectors.toList()));
     }
@@ -36,7 +36,7 @@ public class CategoryResource {
         return categoryResponseModel;
     }
 
-    @GetMapping("/{slug}")
+    @GetMapping(APIEndpoints.SINGLE_CATEGORY_SHOW_API)
     public ResponseEntity<CategoryResponseModel> show(@PathVariable String slug) throws NotFoundEntityException {
         CategoryResponseModel categoryResponse = new CategoryResponseModel();
         CategoryDto category = categoryService.showCategory(slug);
@@ -46,7 +46,7 @@ public class CategoryResource {
 
 
 
-    @PostMapping
+    @PostMapping(APIEndpoints.CATEGORIES_API)
     public ResponseEntity<CategoryResponseModel> store(@RequestBody @Valid CategoryRequestModel categoryRequest){
         CategoryResponseModel responseModel = new CategoryResponseModel();
         CategoryDto categoryDto = new CategoryDto();
@@ -55,5 +55,4 @@ public class CategoryResource {
         BeanUtils.copyProperties(createCategory, responseModel);
         return new ResponseEntity<>(responseModel, HttpStatus.CREATED);
     }
-
 }
