@@ -3,6 +3,7 @@ package com.example.expensemanagermodservice.services;
 import com.example.expensemanagermodservice.dtos.SubCategoryDto;
 import com.example.expensemanagermodservice.entities.CategoryEntity;
 import com.example.expensemanagermodservice.entities.SubCategoryEntity;
+import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.repositories.CategoryRepository;
 import com.example.expensemanagermodservice.repositories.SubCategoryRepository;
 import org.springframework.beans.BeanUtils;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
@@ -27,9 +29,11 @@ public class SubCategoryService {
     public SubCategoryDto createSubCategory(SubCategoryDto subCategoryDto){
         SubCategoryEntity subCategoryEntity = new SubCategoryEntity();
         subCategoryDto.setSlug(toSlug(subCategoryDto.getName()));
-        CategoryEntity category = categoryRepository.findBySlug(subCategoryDto.getCategory_slug()).get();
-        subCategoryDto.setCategory(category);
-        BeanUtils.copyProperties(subCategoryDto, subCategoryEntity);
+        Optional<CategoryEntity> categoryOptional = categoryRepository.findBySlug(subCategoryDto.getCategory_slug());
+        categoryOptional.ifPresentOrElse((category)-> {
+            subCategoryDto.setCategory(category);
+            BeanUtils.copyProperties(subCategoryDto, subCategoryEntity);
+        }, ()-> { throw new NotFoundEntityException("Category Not Found On This Slug");});
         SubCategoryEntity created = subCategoryRepository.save(subCategoryEntity);
         SubCategoryDto returned = new SubCategoryDto();
         BeanUtils.copyProperties(created, returned);
