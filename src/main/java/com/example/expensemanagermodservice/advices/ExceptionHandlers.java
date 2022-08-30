@@ -1,5 +1,6 @@
 package com.example.expensemanagermodservice.advices;
 
+import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,5 +32,14 @@ public class ExceptionHandlers {
         errorMap.put("message",exception.getMessage());
         return errorMap;
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(DataAlreadyExistException.class)
+    public Map<String, String> handleBusinessExceptions(DataAlreadyExistException exception){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("message",exception.getMessage());
+        return errorMap;
+    }
+
 
 }

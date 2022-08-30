@@ -2,6 +2,7 @@ package com.example.expensemanagermodservice.services;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
 import com.example.expensemanagermodservice.entities.CategoryEntity;
+import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.repositories.CategoryRepository;
 import org.springframework.beans.BeanUtils;
@@ -37,15 +38,6 @@ public class CategoryService {
         return categoryDto;
     }
 
-    public List<CategoryEntity> allCategories(){
-//        List<CategoryEntity> categoryEntities = categoryRepository.findAll();
-//        List<CategoryDto> categoriesDto = new ArrayList<>();
-//        BeanUtils.copyProperties(categoryEntities, categoriesDto);
-//        System.out.println(new ArrayList<>(categoriesDto));
-        return new ArrayList<>(categoryRepository.findAll());
-    }
-
-
     public CategoryDto showCategory(String categorySlug) throws NotFoundEntityException {
         CategoryDto categoryDto = new CategoryDto();
         Optional<CategoryEntity> categoryOptional = categoryRepository.findBySlug(categorySlug);
@@ -57,10 +49,17 @@ public class CategoryService {
     }
 
 
-    public CategoryDto createCategory(CategoryDto categoryDto){
+    public CategoryDto createCategory(CategoryDto categoryDto) throws DataAlreadyExistException {
+        String categorySlug = toSlug(categoryDto.getName());
+
+        if(checkCategoryExists(categorySlug)){
+            throw new DataAlreadyExistException("Category Already Exist");
+        }
+
         CategoryEntity categoryEntity = new CategoryEntity();
-        categoryDto.setSlug(toSlug(categoryDto.getName()));
+        categoryDto.setSlug(categorySlug);
         BeanUtils.copyProperties(categoryDto, categoryEntity);
+
         CategoryEntity categorySaved = categoryRepository.save(categoryEntity);
         CategoryDto returnedCategory = new CategoryDto();
         BeanUtils.copyProperties(categorySaved, returnedCategory);
@@ -74,4 +73,8 @@ public class CategoryService {
         return slug.toLowerCase(Locale.ENGLISH);
     }
 
+    private Boolean checkCategoryExists(String categorySlug){
+        Optional<CategoryEntity> categoryExistence = categoryRepository.findBySlug(categorySlug);
+        return categoryExistence.isPresent();
+    }
 }
