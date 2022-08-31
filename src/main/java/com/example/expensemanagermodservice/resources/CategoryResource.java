@@ -1,7 +1,6 @@
 package com.example.expensemanagermodservice.resources;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
-import com.example.expensemanagermodservice.entities.CategoryEntity;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.models.requests.CategoryRequestModel;
 import com.example.expensemanagermodservice.models.responses.CategoryResponseModel;
@@ -13,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,5 +51,16 @@ public class CategoryResource {
         CategoryDto createCategory = categoryService.createCategory(categoryDto);
         BeanUtils.copyProperties(createCategory, responseModel);
         return new ResponseEntity<>(responseModel, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{slug}")
+    public ResponseEntity<CategoryResponseModel> update(@RequestBody @Valid CategoryRequestModel categoryRequest, @PathVariable String slug){
+        CategoryResponseModel responseModel = new CategoryResponseModel();
+        CategoryDto categoryDto = new CategoryDto();
+        BeanUtils.copyProperties(categoryRequest, categoryDto);
+        categoryDto.setSlug(slug);
+        CategoryDto updateCategory = categoryService.updateCategory(categoryDto);
+        BeanUtils.copyProperties(updateCategory, responseModel);
+        return new ResponseEntity<>(responseModel, HttpStatus.ACCEPTED);
     }
 }

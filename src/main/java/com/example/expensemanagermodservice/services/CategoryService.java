@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -51,8 +48,9 @@ public class CategoryService {
 
     public CategoryDto createCategory(CategoryDto categoryDto) throws DataAlreadyExistException {
         String categorySlug = toSlug(categoryDto.getName());
+        Optional<CategoryEntity> categoryExistence = categoryRepository.findBySlug(categorySlug);
 
-        if(checkCategoryExists(categorySlug)){
+        if(categoryExistence.isPresent()){
             throw new DataAlreadyExistException("Category Already Exist");
         }
 
@@ -66,15 +64,33 @@ public class CategoryService {
         return returnedCategory;
     }
 
+    public CategoryDto updateCategory(CategoryDto categoryDto) throws NotFoundEntityException, DataAlreadyExistException{
+
+        Optional<CategoryEntity> categoryOptional = categoryRepository.findBySlug(categoryDto.getSlug());
+        String newSlug = toSlug(categoryDto.getName());
+        categoryOptional.ifPresentOrElse((category) ->  {
+            Optional<CategoryEntity> categoryExistence = categoryRepository.findBySlug(newSlug);
+
+            if(categoryExistence.isPresent()){
+                if(!Objects.equals(categoryOptional.get().getId(), categoryExistence.get().getId())){
+                    throw new DataAlreadyExistException("Category Already Exist");
+                }
+            }
+        },()-> { throw new NotFoundEntityException("Category Not Found On This Slug");});
+
+        categoryDto.setId(categoryOptional.get().getId());
+        categoryDto.setSlug(newSlug);
+        BeanUtils.copyProperties(categoryDto, categoryOptional.get());
+        CategoryEntity categorySaved = categoryRepository.save(categoryOptional.get());
+        CategoryDto returnedCategory = new CategoryDto();
+        BeanUtils.copyProperties(categorySaved, returnedCategory);
+        return returnedCategory;
+    }
+
     private static String toSlug(String name) {
         String nowhitespace = WHITESPACE.matcher(name).replaceAll("-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         String slug = NONLATIN.matcher(normalized).replaceAll("");
         return slug.toLowerCase(Locale.ENGLISH);
-    }
-
-    private Boolean checkCategoryExists(String categorySlug){
-        Optional<CategoryEntity> categoryExistence = categoryRepository.findBySlug(categorySlug);
-        return categoryExistence.isPresent();
     }
 }
