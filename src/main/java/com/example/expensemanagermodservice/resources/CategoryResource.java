@@ -1,6 +1,7 @@
 package com.example.expensemanagermodservice.resources;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
+import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.models.requests.CategoryRequestModel;
 import com.example.expensemanagermodservice.models.responses.CategoryResponseModel;
@@ -62,5 +63,10 @@ public class CategoryResource {
         CategoryDto updateCategory = categoryService.updateCategory(categoryDto);
         BeanUtils.copyProperties(updateCategory, responseModel);
         return new ResponseEntity<>(responseModel, HttpStatus.ACCEPTED);
+    }
+
+    @DeleteMapping("/{slug}")
+    public Boolean delete(@PathVariable String slug) throws NotFoundEntityException, CannotDeleteEntityException {
+        return categoryService.deleteCategory(slug);
     }
 }

@@ -1,5 +1,6 @@
 package com.example.expensemanagermodservice.advices;
 
+import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
 import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import org.springframework.http.HttpStatus;
@@ -35,11 +36,18 @@ public class ExceptionHandlers {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DataAlreadyExistException.class)
-    public Map<String, String> handleBusinessExceptions(DataAlreadyExistException exception){
+    public Map<String, String> handleAlreadyExistExceptions(DataAlreadyExistException exception){
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message",exception.getMessage());
         return errorMap;
     }
 
+    @ResponseStatus(HttpStatus.IM_USED)
+    @ExceptionHandler(CannotDeleteEntityException.class)
+    public Map<String, String> handleCannotDeleteExceptions(CannotDeleteEntityException exception){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("message",exception.getMessage());
+        return errorMap;
+    }
 
 }

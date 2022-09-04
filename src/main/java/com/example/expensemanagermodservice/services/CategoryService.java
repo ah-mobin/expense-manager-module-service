@@ -2,13 +2,17 @@ package com.example.expensemanagermodservice.services;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
 import com.example.expensemanagermodservice.entities.CategoryEntity;
+import com.example.expensemanagermodservice.entities.SubCategoryEntity;
+import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
 import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.repositories.CategoryRepository;
+import com.example.expensemanagermodservice.repositories.SubCategoryRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -20,6 +24,8 @@ public class CategoryService {
 
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    SubCategoryRepository subCategoryRepository;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -85,6 +91,23 @@ public class CategoryService {
         CategoryDto returnedCategory = new CategoryDto();
         BeanUtils.copyProperties(categorySaved, returnedCategory);
         return returnedCategory;
+    }
+
+    @Transactional
+    public boolean deleteCategory(String slug) throws NotFoundEntityException, CannotDeleteEntityException{
+
+        Optional<CategoryEntity> categoryOptional = categoryRepository.findBySlug(slug);
+        categoryOptional.ifPresentOrElse((category) ->  {
+//            List<Optional<SubCategoryEntity>> subCategoryEntity = Collections.singletonList(subCategoryRepository.findByCategoryId(category.getId()));
+//            if(subCategoryEntity.get(0).isPresent()){
+//                throw new CannotDeleteEntityException("Please Delete Its Child And Then Try To Delete The Entity");
+                subCategoryRepository.deleteByCategoryId(category.getId());
+//            }
+        },()-> { throw new NotFoundEntityException("Category Not Found On This Slug");});
+
+        categoryRepository.delete(categoryOptional.get());
+
+        return true;
     }
 
     private static String toSlug(String name) {
