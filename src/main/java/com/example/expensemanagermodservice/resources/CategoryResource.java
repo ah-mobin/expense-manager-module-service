@@ -6,6 +6,7 @@ import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
 import com.example.expensemanagermodservice.models.requests.CategoryRequestModel;
 import com.example.expensemanagermodservice.models.responses.CategoryResponseModel;
 import com.example.expensemanagermodservice.services.CategoryService;
+import com.example.expensemanagermodservice.services.shares.CategoryPropertyShare;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,9 @@ import java.util.List;
 public class CategoryResource {
 
     @Autowired
-    CategoryService categoryService;
+    private CategoryService categoryService;
+    @Autowired
+    private CategoryPropertyShare categoryPropertyShare;
 
     @GetMapping
     public ResponseEntity<List<CategoryResponseModel>> index() {
@@ -37,12 +40,8 @@ public class CategoryResource {
 
     @PostMapping
     public ResponseEntity<CategoryResponseModel> store(@RequestBody @Valid CategoryRequestModel categoryRequest){
-        CategoryResponseModel responseModel = new CategoryResponseModel();
-        CategoryDto categoryDto = new CategoryDto();
-        BeanUtils.copyProperties(categoryRequest, categoryDto);
-        CategoryDto createCategory = categoryService.createCategory(categoryDto);
-        BeanUtils.copyProperties(createCategory, responseModel);
-        return new ResponseEntity<>(responseModel, HttpStatus.CREATED);
+        CategoryDto createCategory = categoryService.createCategory(categoryRequest);
+        return new ResponseEntity<>(categoryPropertyShare.dtoToResponse(createCategory), HttpStatus.CREATED);
     }
 
     @PutMapping("/{slug}")

@@ -5,10 +5,12 @@ import com.example.expensemanagermodservice.entities.CategoryEntity;
 import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
 import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
+import com.example.expensemanagermodservice.models.requests.CategoryRequestModel;
 import com.example.expensemanagermodservice.models.responses.CategoryResponseModel;
 import com.example.expensemanagermodservice.models.responses.SubCategoryOnCategoryResponse;
 import com.example.expensemanagermodservice.repositories.CategoryRepository;
 import com.example.expensemanagermodservice.repositories.SubCategoryRepository;
+import com.example.expensemanagermodservice.services.shares.CategoryPropertyShare;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ public class CategoryService {
     CategoryRepository categoryRepository;
     @Autowired
     SubCategoryRepository subCategoryRepository;
+    @Autowired
+    private CategoryPropertyShare categoryPropertyShare;
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -73,7 +77,8 @@ public class CategoryService {
     }
 
 
-    public CategoryDto createCategory(CategoryDto categoryDto) throws DataAlreadyExistException {
+    public CategoryDto createCategory(CategoryRequestModel categoryRequest) throws DataAlreadyExistException {
+        CategoryDto categoryDto = categoryPropertyShare.requestToDto(categoryRequest);
         String categorySlug = toSlug(categoryDto.getName());
         Optional<CategoryEntity> categoryExistence = categoryRepository.findBySlug(categorySlug);
 
