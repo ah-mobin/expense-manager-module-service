@@ -20,6 +20,7 @@ public class SubCategoryEntity {
     private String slug;
     @ManyToOne
     @JoinColumn(name="category_id",nullable = false)
+    @JsonIgnore
     private CategoryEntity category;
 
 }

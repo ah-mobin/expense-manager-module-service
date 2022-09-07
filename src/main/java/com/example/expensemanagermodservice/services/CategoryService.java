@@ -2,10 +2,11 @@ package com.example.expensemanagermodservice.services;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
 import com.example.expensemanagermodservice.entities.CategoryEntity;
-import com.example.expensemanagermodservice.entities.SubCategoryEntity;
 import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
 import com.example.expensemanagermodservice.handlers.DataAlreadyExistException;
 import com.example.expensemanagermodservice.handlers.NotFoundEntityException;
+import com.example.expensemanagermodservice.models.responses.CategoryResponseModel;
+import com.example.expensemanagermodservice.models.responses.SubCategoryOnCategoryResponse;
 import com.example.expensemanagermodservice.repositories.CategoryRepository;
 import com.example.expensemanagermodservice.repositories.SubCategoryRepository;
 import org.springframework.beans.BeanUtils;
@@ -17,7 +18,6 @@ import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class CategoryService {
@@ -31,7 +31,11 @@ public class CategoryService {
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
 
-    public List<CategoryDto> index(){
+    public List<CategoryResponseModel> getCategories() {
+        return findAllCategories().stream().map(this::categoryResponse).collect(Collectors.toList());
+    }
+
+    private List<CategoryDto> findAllCategories(){
         return categoryRepository.findAll().stream().map(this::categoryDto).collect(Collectors.toList());
     }
 
@@ -39,6 +43,23 @@ public class CategoryService {
         CategoryDto categoryDto = new CategoryDto();
         BeanUtils.copyProperties(categoryEntity, categoryDto);
         return categoryDto;
+    }
+
+    private CategoryResponseModel categoryResponse(CategoryDto categoryDto){
+        CategoryResponseModel categoryResponseModel = new CategoryResponseModel();
+        BeanUtils.copyProperties(categoryDto, categoryResponseModel);
+
+        List<SubCategoryOnCategoryResponse> subCategoryResponse = new ArrayList<>();
+        categoryDto.getSubCategories().forEach(subCategoryEntity -> {
+            SubCategoryOnCategoryResponse subCategoryOnCategoryResponse = new SubCategoryOnCategoryResponse();
+            subCategoryOnCategoryResponse.setName(categoryDto.getName());
+            subCategoryOnCategoryResponse.setSlug(categoryDto.getSlug());
+            subCategoryResponse.add(subCategoryOnCategoryResponse);
+        });
+
+        categoryResponseModel.setSubCategories(subCategoryResponse);
+
+        return categoryResponseModel;
     }
 
     public CategoryDto showCategory(String categorySlug) throws NotFoundEntityException {
@@ -98,11 +119,7 @@ public class CategoryService {
 
         Optional<CategoryEntity> categoryOptional = categoryRepository.findBySlug(slug);
         categoryOptional.ifPresentOrElse((category) ->  {
-//            List<Optional<SubCategoryEntity>> subCategoryEntity = Collections.singletonList(subCategoryRepository.findByCategoryId(category.getId()));
-//            if(subCategoryEntity.get(0).isPresent()){
-//                throw new CannotDeleteEntityException("Please Delete Its Child And Then Try To Delete The Entity");
                 subCategoryRepository.deleteByCategoryId(category.getId());
-//            }
         },()-> { throw new NotFoundEntityException("Category Not Found On This Slug");});
 
         categoryRepository.delete(categoryOptional.get());

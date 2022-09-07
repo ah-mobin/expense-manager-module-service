@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("categories")
@@ -25,13 +24,7 @@ public class CategoryResource {
 
     @GetMapping
     public ResponseEntity<List<CategoryResponseModel>> index() {
-        return ResponseEntity.ok(categoryService.index().stream().map(this::categoryResponse).collect(Collectors.toList()));
-    }
-
-    private CategoryResponseModel categoryResponse(CategoryDto categoryDto){
-        CategoryResponseModel categoryResponseModel = new CategoryResponseModel();
-        BeanUtils.copyProperties(categoryDto, categoryResponseModel);
-        return categoryResponseModel;
+        return ResponseEntity.ok(categoryService.getCategories());
     }
 
     @GetMapping("/{slug}")
@@ -41,8 +34,6 @@ public class CategoryResource {
         BeanUtils.copyProperties(category, categoryResponse);
         return ResponseEntity.ok(categoryResponse);
     }
-
-
 
     @PostMapping
     public ResponseEntity<CategoryResponseModel> store(@RequestBody @Valid CategoryRequestModel categoryRequest){
