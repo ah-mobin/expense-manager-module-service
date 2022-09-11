@@ -1,4 +1,4 @@
-package com.example.expensemanagermodservice.resources;
+package com.example.expensemanagermodservice.controllers;
 
 import com.example.expensemanagermodservice.dtos.CategoryDto;
 import com.example.expensemanagermodservice.handlers.CannotDeleteEntityException;
