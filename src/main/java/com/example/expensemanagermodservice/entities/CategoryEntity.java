@@ -14,12 +14,11 @@ import java.util.UUID;
 @NoArgsConstructor
 public class CategoryEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "UUID")
+    @Column(updatable = false, nullable = false)
+    private UUID uuid;
     @Column(nullable = false, length = 64)
     private String name;
-    @Column(nullable = false, unique = true, length = 64)
-    private String slug;
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<SubCategoryEntity> subCategories;

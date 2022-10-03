@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class CategoryResponseModel {
-    private String slug;
     private String name;
     private List<SubCategoryOnCategoryResponse> subCategories;
 }
