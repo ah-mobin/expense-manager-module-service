@@ -7,7 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SubCategoryResponseModel {
-    private String slug;
-    private CategoryEntity category;
+    private Long id;
     private String name;
 }

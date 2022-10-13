@@ -1,5 +1,6 @@
 package com.example.expensemanagermodservice.models.requests;
 
+import com.example.expensemanagermodservice.customs.CategoryIdExists;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
